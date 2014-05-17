@@ -1,0 +1,27 @@
+{
+    "name": "phergie/phergie-irc-plugin-react-youtube",
+    "description": "Phergie plugin for providing information about YouTube videos",
+    "keywords": [ "phergie", "irc", "bot", "plugin" ],
+    "license": "BSD-2-Clause",
+    "support": {
+        "email": "team@phergie.org",
+        "irc": "irc://irc.freenode.net/phergie",
+        "issues": "https://github.com/phergie/phergie-irc-plugin-react-youtube/issues",
+        "source": "https://github.com/phergie/phergie-irc-plugin-react-youtube"
+    },
+    "minimum-stability": "dev",
+    "require": {
+        "phergie/phergie-irc-bot-react": "dev-master",
+        "wyrihaximus/phergie-url": "dev-master",
+        "ext-json": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "4.1.*",
+        "phake/phake": "2.0.0-beta2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Phergie\\Irc\\Plugin\\React\\YouTube\\": "src"
+        }
+    }
+}
