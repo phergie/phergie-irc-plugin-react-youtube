@@ -28,16 +28,25 @@ class Plugin extends AbstractPlugin
      *
      * Supported keys:
      *
-     * format - optional pattern used to format video data before sending it
+     * key - required Google API key
      *
-     * dateFormat - optional date format used for video publish times
+     * responseFormat - optional pattern used to format video data before sending it
+     *
+     * publishedFormat - optional date format used for video publish
+     * timestamps, see http://us3.php.net/manual/en/function.date.php#refsect1-function.date-parameters
+     *
+     * durationFormat - optional interval format used for video durations, see
+     * http://us3.php.net/manual/en/dateinterval.format.php#refsect1-dateinterval.format-parameters
      *
      * @param array $config
+     * @throws \DomainException if any settings are invalid
      */
     public function __construct(array $config = array())
     {
-        $this->format = $this->getFormat($config);
-        $this->dateFormat = $this->getDateFormat($config);
+        $this->key = $this->getKey($config);
+        $this->responseFormat = $this->getResponseFormat($config);
+        $this->publishedFormat = $this->getPublishedFormat($config);
+        $this->durationFormat = $this->getDurationFormat($config);
     }
 
     /**
@@ -64,12 +73,15 @@ class Plugin extends AbstractPlugin
      */
     public function handleUrl($url, Event $event, Queue $queue)
     {
+        $logger = $this->getLogger();
+        $logger->info('handleUrl', array('url' => $url));
         $v = $this->getVideoId($url);
+        $logger->info('getVideoId', array('url' => $url, 'v' => $v));
         if (!$v) {
             return;
         }
-        $url = $this->getVideoUrl($v);
-        $request = $this->getApiRequest($url, $event, $queue);
+        $apiUrl = $this->getApiUrl($v);
+        $request = $this->getApiRequest($apiUrl, $event, $queue);
         $this->getEventEmitter()->emit('http.request', array($request));
     }
 
@@ -81,12 +93,16 @@ class Plugin extends AbstractPlugin
      */
     protected function getVideoId($url)
     {
+        $logger = $this->getLogger();
         $parsed = parse_url($url);
+        $logger->debug('getVideoId', array('url' => $url, 'parsed' => $parsed));
         switch ($parsed['host']) {
             case 'youtu.be':
                 return ltrim($parsed['path'], '/');
+            case 'www.youtube.com':
             case 'youtube.com':
                 parse_str($parsed['query'], $query);
+                $logger->debug('getVideoId', array('url' => $url, 'query' => $query));
                 if (!empty($query['v'])) {
                     return $query['v'];
                 }
@@ -97,15 +113,15 @@ class Plugin extends AbstractPlugin
     /**
      * Derives an API URL to get data for a specified video.
      *
-     * @param string $query Video identifier or search phrase
+     * @param string $id Video identifier
      * @return string
      */
-    protected function getVideoUrl($query)
+    protected function getApiUrl($id)
     {
-        return 'http://gdata.youtube.com/feeds/api/videos?' . http_build_query(array(
-            'max-results' => '1',
-            'alt' => 'json',
-            'q' => $query,
+        return 'https://www.googleapis.com/youtube/v3/videos?' . http_build_query(array(
+            'id' => $id,
+            'key' => $this->key,
+            'part' => 'id, snippet, contentDetails, player, statistics, status',
         ));
     }
 
@@ -121,7 +137,7 @@ class Plugin extends AbstractPlugin
         $self = $this;
         $request = new HttpRequest(array(
             'url' => $url,
-            'resolveCallback' => function($data) use ($self, $event, $queue) {
+            'resolveCallback' => function($data) use ($self, $url, $event, $queue) {
                 $self->resolve($url, $data, $event, $queue);
             },
             'rejectCallback' => function($error) use ($self, $url) {
@@ -141,20 +157,34 @@ class Plugin extends AbstractPlugin
      */
     public function resolve($url, $data, Event $event, Queue $queue)
     {
+        $logger = $this->getLogger();
         $json = json_decode($data);
-        $entries = $json->feed->entry;
-        if (!$entries) {
-            return $this->getLogger()->warning(
+        $logger->info('resolve', array('url' => $url, 'json' => $json));
+
+        if (isset($json->error)) {
+            return $logger->warning(
+                'Query response contained an error',
+                array(
+                    'url' => $url,
+                    'error' => $json->error,
+                )
+            );
+        }
+
+        $entries = $json->items;
+        if (!is_array($entries) || !$entries) {
+            return $logger->warning(
                 'Query returned no results',
                 array('url' => $url)
             );
         }
+
         $entry = reset($entries);
         $replacements = $this->getReplacements($entry);
         $message = str_replace(
             array_keys($replacements),
             array_values($replacements),
-            $this->format
+            $this->responseFormat
         );
         $queue->ircPrivmsg($event->getSource(), $message);
     }
@@ -168,32 +198,29 @@ class Plugin extends AbstractPlugin
      */
     protected function getReplacements($entry)
     {
-        $link = $entry->link[0]->href;
-        $title = $entry->title->{'$t'};
-        $author = $entry->author[0]->name->{'$t'};
-        $seconds = $entry->{'media$group'}->{'yt$duration'}->seconds;
-        $published = $entry->published->{'$t'};
-        $views = $entry->{'yt$statistics'}->viewCount;
-        $rating = $entry->{'gd$rating'}->average;
-
-        $minutes = floor($seconds / 60);
-        $seconds = str_pad($seconds % 60, 2, '0', STR_PAD_LEFT);
-        $parsed_link = parse_url($link);
-        parse_str($parsed_link['query'], $parsed_query);
-        $link = 'http://youtu.be/' . $parsed_query['v'];
-        $published = date($this->dateFormat, strtotime($published));
-        $views = number_format($views, 0);
-        $rating = round($rating, 2);
+        $link = 'http://youtu.be/' . $entry->id;
+        $title = $entry->snippet->title;
+        $author = $entry->snippet->channelTitle;
+        $published = date($this->publishedFormat, strtotime($entry->snippet->publishedAt));
+        $views = number_format($entry->statistics->viewCount, 0);
+        $likes = number_format($entry->statistics->likeCount, 0);
+        $dislikes = number_format($entry->statistics->dislikeCount, 0);
+        $favorites = number_format($entry->statistics->favoriteCount, 0);
+        $comments = number_format($entry->statistics->commentCount, 0);
+        $durationInterval = new \DateInterval($entry->contentDetails->duration);
+        $duration = $durationInterval->format($this->durationFormat);
 
         return array(
             '%link%' => $link,
             '%title%' => $title,
             '%author%' => $author,
-            '%minutes%' => $minutes,
-            '%seconds%' => $seconds,
             '%published%' => $published,
             '%views%' => $views,
-            '%rating%' => $rating,
+            '%likes%' => $likes,
+            '%dislikes%' => $dislikes,
+            '%favorites%' => $favorites,
+            '%comments%' => $comments,
+            '%duration%' => $duration,
         );
     }
 
@@ -215,25 +242,41 @@ class Plugin extends AbstractPlugin
     }
 
     /**
+     * Extracts a Google API key for interacting with the YouTube API from
+     * configuration.
+     *
+     * @param array $config
+     * @return string
+     * @throws \DomainException if key setting is invalid
+     */
+    protected function getKey(array $config)
+    {
+        if (!isset($config['key']) || !is_string($config['key'])) {
+            throw new \DomainException('key must reference a string');
+        }
+        return $config['key'];
+    }
+
+    /**
      * Extracts a pattern for formatting video data from configuration.
      *
      * @param array $config
      * @return string
      * @throws \DomainException if format setting is invalid
      */
-    protected function getFormat(array $config)
+    protected function getResponseFormat(array $config)
     {
-        if (isset($config['format'])) {
-            if (!is_string($config['format'])) {
-                throw new \DomainException('format must reference a string');
+        if (isset($config['responseFormat'])) {
+            if (!is_string($config['responseFormat'])) {
+                throw new \DomainException('responseFormat must reference a string');
             }
-            return $config['format'];
+            return $config['responseFormat'];
         }
         return '[ %link% ] "%title%" by %author%'
-            . ', Length %minutes%m%seconds%s'
-            . ', Published %published%'
-            . ', Views %views%'
-            . ', Rating %rating%';
+            . '; Length %duration%'
+            . '; Published %published%'
+            . '; Views %views%'
+            . '; Likes %likes%';
     }
 
     /**
@@ -242,16 +285,34 @@ class Plugin extends AbstractPlugin
      *
      * @param array $config
      * @return string
-     * @throws \DomainException if dateFormat setting is invalid
+     * @throws \DomainException if publishedFormat setting is invalid
      */
-    protected function getDateFormat(array $config)
+    protected function getPublishedFormat(array $config)
     {
-        if (isset($config['dateFormat'])) {
-            if (!is_string($config['dateFormat'])) {
-                throw new \DomainException('dateFormat must reference a string');
+        if (isset($config['publishedFormat'])) {
+            if (!is_string($config['publishedFormat'])) {
+                throw new \DomainException('publishedFormat must reference a string');
             }
-            return $config['dateFormat'];
+            return $config['publishedFormat'];
         }
         return 'n/j/y g:i A';
+    }
+
+    /**
+     * Extracts a pattern for formatting video durations from configuration.
+     *
+     * @param array $config
+     * @return string
+     * @throws \DomainException if durationFormat setting is invalid
+     */
+    protected function getDurationFormat(array $config)
+    {
+        if (isset($config['durationFormat'])) {
+            if (!is_string($config['durationFormat'])) {
+                throw new \DomainException('durationFormat must reference a string');
+            }
+            return $config['durationFormat'];
+        }
+        return '%im%ss';
     }
 }
