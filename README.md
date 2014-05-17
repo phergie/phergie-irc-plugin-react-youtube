@@ -22,12 +22,57 @@ See Phergie documentation for more information on
 ## Configuration
 
 ```php
-new \Phergie\Irc\Plugin\React\YouTube\Plugin(array(
+return array(
 
+    'plugins' => array(
 
+        // dependencies
+        new \WyriHaximus\Phergie\Plugin\Dns\Plugin,
+        new \WyriHaximus\Phergie\Plugin\Http\Plugin,
+        new \WyriHaximus\Phergie\Plugin\Url\Plugin,
 
-))
+        new \Phergie\Irc\Plugin\React\YouTube\Plugin(array(
+
+            // required: Google API section
+            'key' => 'YOUR_KEY_GOES_HERE',
+
+            // optional: pattern used to format video data before sending it
+            'responseFormat' =>
+                    '[ %link% ] "%title%" by %author%'
+                    . '; Length %duration%'
+                    . '; Published %published%'
+                    . '; Views %views%'
+                    . '; Likes %likes%',
+
+            // optional: date format used for video publish timestamps
+            'publishedFormat' => 'n/j/y g:i A',
+
+            // optional: interval format used for video durations
+            'durationFormat' => '%im%ss',
+
+        )),
+
+    )
+);
 ```
+
+Markers supported in `responseFormat`:
+* `%link%`
+* `%title%`
+* `%author%`
+* `%published%`
+* `%views%`
+* `%likes%`
+* `%dislikes%`
+* `%favorites%`
+* `%comments%`
+* `%duration%`
+
+[How to get a Google API key](https://developers.google.com/youtube/v3/getting-started#before-you-start)
+
+[Format used by `publishedFormat`](http://php.net/manual/en/function.date.php#refsect1-function.date-parameters)
+
+[Format used by `durationFormat`](http://php.net/manual/en/dateinterval.format.php#refsect1-dateinterval.format-parameters)
 
 ## Tests
 
