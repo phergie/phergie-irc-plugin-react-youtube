@@ -1,0 +1,55 @@
+{
+ "kind": "youtube#videoListResponse",
+ "etag": "\"ePFRUfYBkeQ2ncpP9OLHKB0fDw4/RvUmVg3Xy62KzRpjaFKEHHaKfrg\"",
+ "pageInfo": {
+  "totalResults": 1,
+  "resultsPerPage": 1
+ },
+ "items": [
+  {
+   "kind": "youtube#video",
+   "etag": "\"ePFRUfYBkeQ2ncpP9OLHKB0fDw4/1B3FtDctcWQMwhdrM_c0Uk8V8RM\"",
+   "id": "HFuTvTVAO-M",
+   "snippet": {
+    "publishedAt": "2010-02-07T14:09:51.000Z",
+    "channelId": "UCE6Oypn9-_8RDBDh5m4qI_Q",
+    "title": "Nick Motil - Butterflies (2010)",
+    "description": "A song off my \"Everything's Alright EP\"\r\n\r\nI think its really cool that there are 2 covers going around out there from some really talented people covering \"Butterflies\" - I'd love to see more!\r\n\r\nButterflies lyrics: http://nickmotil.com/lyrics-butterflies.html \r\n\r\nButterflies chord chart: - I'm going to be posting my chord charts and tunings and voicings very soon! we're just trying to find the best format for them to be in :)\r\n\r\ntuning: DADGAD\r\n\r\nhang tight -\r\n\r\nhttp://www.itunes.com/nickmotil\r\nhttp://www.nickmotil.com \r\nhttp://www.facebook.com/nickmotil \r\nhttp://www,myspace.com/motillive",
+    "thumbnails": {
+     "default": {
+      "url": "https://i1.ytimg.com/vi/HFuTvTVAO-M/default.jpg",
+      "width": 120,
+      "height": 90
+     },
+     "medium": {
+      "url": "https://i1.ytimg.com/vi/HFuTvTVAO-M/mqdefault.jpg",
+      "width": 320,
+      "height": 180
+     },
+     "high": {
+      "url": "https://i1.ytimg.com/vi/HFuTvTVAO-M/hqdefault.jpg",
+      "width": 480,
+      "height": 360
+     }
+    },
+    "channelTitle": "Nick Motil",
+    "categoryId": "10",
+    "liveBroadcastContent": "none"
+   },
+   "contentDetails": {
+    "duration": "PT3M30S",
+    "dimension": "2d",
+    "definition": "sd",
+    "caption": "false",
+    "licensedContent": false
+   },
+   "statistics": {
+    "viewCount": "6283",
+    "likeCount": "35",
+    "dislikeCount": "0",
+    "favoriteCount": "0",
+    "commentCount": "27"
+   }
+  }
+ ]
+}

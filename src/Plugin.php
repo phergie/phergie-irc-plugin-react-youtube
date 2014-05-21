@@ -23,6 +23,11 @@ use WyriHaximus\Phergie\Plugin\Http\Request as HttpRequest;
  */
 class Plugin extends AbstractPlugin
 {
+    const ERR_INVALID_KEY = 1;
+    const ERR_INVALID_RESPONSEFORMAT = 2;
+    const ERR_INVALID_PUBLISHEDFORMAT = 3;
+    const ERR_INVALID_DURATIONFORMAT = 4;
+
     /**
      * Accepts plugin configuration.
      *
@@ -32,11 +37,9 @@ class Plugin extends AbstractPlugin
      *
      * responseFormat - optional pattern used to format video data before sending it
      *
-     * publishedFormat - optional date format used for video publish
-     * timestamps, see http://us3.php.net/manual/en/function.date.php#refsect1-function.date-parameters
+     * publishedFormat - optional date format used for video publish timestamps
      *
-     * durationFormat - optional interval format used for video durations, see
-     * http://us3.php.net/manual/en/dateinterval.format.php#refsect1-dateinterval.format-parameters
+     * durationFormat - optional interval format used for video durations
      *
      * @param array $config
      * @throws \DomainException if any settings are invalid
@@ -68,7 +71,7 @@ class Plugin extends AbstractPlugin
      * URLs to them.
      *
      * @param string $url
-     * @param \Phergie\Irc\Bot\React\EventInterface $event
+     * @param \Phergie\Irc\Event\EventInterface $event
      * @param \Phergie\Irc\Bot\React\EventQueueInterface $queue
      */
     public function handleUrl($url, Event $event, Queue $queue)
@@ -101,10 +104,12 @@ class Plugin extends AbstractPlugin
                 return ltrim($parsed['path'], '/');
             case 'www.youtube.com':
             case 'youtube.com':
-                parse_str($parsed['query'], $query);
-                $logger->debug('getVideoId', array('url' => $url, 'query' => $query));
-                if (!empty($query['v'])) {
-                    return $query['v'];
+                if (!empty($parsed['query'])) {
+                    parse_str($parsed['query'], $query);
+                    $logger->debug('getVideoId', array('url' => $url, 'query' => $query));
+                    if (!empty($query['v'])) {
+                        return $query['v'];
+                    }
                 }
         }
         return null;
@@ -121,7 +126,7 @@ class Plugin extends AbstractPlugin
         return 'https://www.googleapis.com/youtube/v3/videos?' . http_build_query(array(
             'id' => $id,
             'key' => $this->key,
-            'part' => 'id, snippet, contentDetails, player, statistics, status',
+            'part' => 'id, snippet, contentDetails, statistics',
         ));
     }
 
@@ -198,7 +203,7 @@ class Plugin extends AbstractPlugin
      */
     protected function getReplacements($entry)
     {
-        $link = 'http://youtu.be/' . $entry->id;
+        $link = 'https://youtu.be/' . $entry->id;
         $title = $entry->snippet->title;
         $author = $entry->snippet->channelTitle;
         $published = date($this->publishedFormat, strtotime($entry->snippet->publishedAt));
@@ -252,7 +257,10 @@ class Plugin extends AbstractPlugin
     protected function getKey(array $config)
     {
         if (!isset($config['key']) || !is_string($config['key'])) {
-            throw new \DomainException('key must reference a string');
+            throw new \DomainException(
+                'key must reference a string',
+                self::ERR_INVALID_KEY
+            );
         }
         return $config['key'];
     }
@@ -268,7 +276,10 @@ class Plugin extends AbstractPlugin
     {
         if (isset($config['responseFormat'])) {
             if (!is_string($config['responseFormat'])) {
-                throw new \DomainException('responseFormat must reference a string');
+                throw new \DomainException(
+                    'responseFormat must reference a string',
+                    self::ERR_INVALID_RESPONSEFORMAT
+                );
             }
             return $config['responseFormat'];
         }
@@ -291,7 +302,10 @@ class Plugin extends AbstractPlugin
     {
         if (isset($config['publishedFormat'])) {
             if (!is_string($config['publishedFormat'])) {
-                throw new \DomainException('publishedFormat must reference a string');
+                throw new \DomainException(
+                    'publishedFormat must reference a string',
+                    self::ERR_INVALID_PUBLISHEDFORMAT
+                );
             }
             return $config['publishedFormat'];
         }
@@ -309,7 +323,10 @@ class Plugin extends AbstractPlugin
     {
         if (isset($config['durationFormat'])) {
             if (!is_string($config['durationFormat'])) {
-                throw new \DomainException('durationFormat must reference a string');
+                throw new \DomainException(
+                    'durationFormat must reference a string',
+                    self::ERR_INVALID_DURATIONFORMAT
+                );
             }
             return $config['durationFormat'];
         }
