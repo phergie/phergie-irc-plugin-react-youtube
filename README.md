@@ -33,7 +33,7 @@ return array(
 
         new \Phergie\Irc\Plugin\React\YouTube\Plugin(array(
 
-            // required: Google API section
+            // required: Google API key
             'key' => 'YOUR_KEY_GOES_HERE',
 
             // optional: pattern used to format video data before sending it
