@@ -8,11 +8,12 @@
  * @package Phergie\Irc\Plugin\React\YouTube
  */
 
-namespace Phergie\Irc\Plugin\React\YouTube;
+namespace Phergie\Irc\Tests\Plugin\React\YouTube;
 
 use Phake;
-use Phergie\Irc\Plugin\React\Command\CommandEvent as Event;
 use Phergie\Irc\Bot\React\EventQueueInterface as Queue;
+use Phergie\Irc\Plugin\React\Command\CommandEvent as Event;
+use Phergie\Irc\Plugin\React\YouTube\Plugin;
 
 /**
  * Tests for the Plugin class.
