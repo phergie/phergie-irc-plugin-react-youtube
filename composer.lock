@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "58b706ac4b5bbb10832ac91614ed4b4e",
+    "hash": "b75dcd77672e67afb11b491cbaac8068",
     "packages": [
         {
             "name": "evenement/evenement",
@@ -2122,29 +2122,29 @@
         },
         {
             "name": "symfony/yaml",
-            "version": "dev-master",
+            "version": "2.8.x-dev",
             "target-dir": "Symfony/Component/Yaml",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/Yaml.git",
-                "reference": "190bb846ec9c063efb0d64aebf49e821b4c9ba9e"
+                "reference": "fdded56dde4ca9efce6322887bf5eaa7bb0aae3e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/Yaml/zipball/190bb846ec9c063efb0d64aebf49e821b4c9ba9e",
-                "reference": "190bb846ec9c063efb0d64aebf49e821b4c9ba9e",
+                "url": "https://api.github.com/repos/symfony/Yaml/zipball/fdded56dde4ca9efce6322887bf5eaa7bb0aae3e",
+                "reference": "fdded56dde4ca9efce6322887bf5eaa7bb0aae3e",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.5.9"
+                "php": ">=5.3.9"
             },
             "require-dev": {
-                "symfony/phpunit-bridge": "~2.8|~3.0"
+                "symfony/phpunit-bridge": "~2.7|~3.0.0"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "3.0-dev"
+                    "dev-master": "2.8-dev"
                 }
             },
             "autoload": {
@@ -2168,7 +2168,7 @@
             ],
             "description": "Symfony Yaml Component",
             "homepage": "http://symfony.com",
-            "time": "2015-04-10 07:31:54"
+            "time": "2015-04-10 08:56:33"
         }
     ],
     "aliases": [],
