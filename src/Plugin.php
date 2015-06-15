@@ -110,6 +110,12 @@ class Plugin extends AbstractPlugin
                     if (!empty($query['v'])) {
                         return $query['v'];
                     }
+                } elseif (isset($parsed['path']) && substr($parsed['path'], 0, 7) == '/embed/') {
+                    $logger->debug('getVideoId', array('url' => $url, 'path' => $parsed['path']));
+                    $vId = substr($parsed['path'], 7);
+                    if (!empty($vId)) {
+                        return $vId;
+                    }
                 }
         }
         return null;
