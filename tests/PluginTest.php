@@ -147,6 +147,8 @@ class PluginTest extends \PHPUnit_Framework_TestCase
     {
         return array(
             array('http://www.youtube.com/watch?v=HFuTvTVAO-M'),
+            array('https://www.youtube.com/embed/HFuTvTVAO-M'),
+            array('https://youtube.com/embed/HFuTvTVAO-M'),
             array('http://youtube.com/watch?v=HFuTvTVAO-M'),
             array('http://youtu.be/HFuTvTVAO-M'),
         );
