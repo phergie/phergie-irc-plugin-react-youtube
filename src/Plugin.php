@@ -13,7 +13,7 @@ namespace Phergie\Irc\Plugin\React\YouTube;
 use Phergie\Irc\Bot\React\AbstractPlugin;
 use Phergie\Irc\Bot\React\EventQueueInterface as Queue;
 use Phergie\Irc\Event\EventInterface as Event;
-use WyriHaximus\Phergie\Plugin\Http\Request as HttpRequest;
+use Phergie\Plugin\Http\Request as HttpRequest;
 
 /**
  * Plugin class.

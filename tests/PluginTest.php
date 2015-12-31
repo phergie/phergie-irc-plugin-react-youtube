@@ -170,7 +170,7 @@ class PluginTest extends \PHPUnit_Framework_TestCase
         $this->assertInternalType('array', $params);
         $this->assertCount(1, $params);
         $request = reset($params);
-        $this->assertInstanceOf('\WyriHaximus\Phergie\Plugin\Http\Request', $request);
+        $this->assertInstanceOf('\Phergie\Plugin\Http\Request', $request);
         $this->assertSame($this->requestUrl, $request->getUrl());
 
         $config = $request->getConfig();
