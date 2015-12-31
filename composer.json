@@ -12,7 +12,7 @@
     "minimum-stability": "dev",
     "require": {
         "phergie/phergie-irc-bot-react": "^2",
-        "phergie/phergie-irc-plugin-react-url": "^2",
+        "phergie/phergie-irc-plugin-react-url": "^3",
         "ext-json": "*"
     },
     "require-dev": {
