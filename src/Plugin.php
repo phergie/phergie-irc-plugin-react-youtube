@@ -169,7 +169,7 @@ class Plugin extends AbstractPlugin
     public function resolve($url, $data, Event $event, Queue $queue)
     {
         $logger = $this->getLogger();
-        $json = json_decode($data);
+        $json = json_decode($data->getBody());
         $logger->info('resolve', array('url' => $url, 'json' => $json));
 
         if (isset($json->error)) {
