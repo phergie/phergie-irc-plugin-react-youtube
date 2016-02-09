@@ -162,11 +162,11 @@ class Plugin extends AbstractPlugin
      * Handles a successful request for video data.
      *
      * @param string $url URL of the request
-     * @param string $data Response body
+     * @param \GuzzleHttp\Message\Response $data Response body
      * @param \Phergie\Irc\EventInterface $event
      * @param \Phergie\Irc\Bot\React\EventQueueInterface $queue
      */
-    public function resolve($url, $data, Event $event, Queue $queue)
+    public function resolve($url, \GuzzleHttp\Message\Response $data, Event $event, Queue $queue)
     {
         $logger = $this->getLogger();
         $json = json_decode($data->getBody());
