@@ -10,6 +10,7 @@
 
 namespace Phergie\Irc\Tests\Plugin\React\YouTube;
 
+use GuzzleHttp\Message\Response as Response;
 use Phake;
 use Phergie\Irc\Bot\React\EventQueueInterface as Queue;
 use Phergie\Irc\Plugin\React\Command\CommandEvent as Event;
@@ -67,6 +68,7 @@ class PluginTest extends \PHPUnit_Framework_TestCase
         $this->queue = Phake::mock('\Phergie\Irc\Bot\React\EventQueueInterface');
         $this->emitter = Phake::mock('\Evenement\EventEmitterInterface');
         $this->logger = Phake::mock('\Psr\Log\LoggerInterface');
+        $this->response = Phake::mock('\GuzzleHttp\Message\Response');
         $this->plugin = $this->getPlugin();
 
         date_default_timezone_set('America/Chicago');
@@ -215,8 +217,8 @@ class PluginTest extends \PHPUnit_Framework_TestCase
         Phake::verifyNoFurtherInteraction($this->queue);
         $requestConfig = $this->testHandleUrlWithVideoUrl('http://youtu.be/HFuTvTVAO-M');
         $resolve = $requestConfig['resolveCallback'];
-        $data = '{"error":"foo"}';
-        $resolve($data, $this->event, $this->queue);
+        Phake::when($this->response)->getBody()->thenReturn('{"error":"foo"}');
+        $resolve($this->response, $this->event, $this->queue);
         Phake::verify($this->logger)->warning(
             'Query response contained an error',
             array(
@@ -234,8 +236,8 @@ class PluginTest extends \PHPUnit_Framework_TestCase
         Phake::verifyNoFurtherInteraction($this->queue);
         $requestConfig = $this->testHandleUrlWithVideoUrl('http://youtu.be/HFuTvTVAO-M');
         $resolve = $requestConfig['resolveCallback'];
-        $data = file_get_contents(__DIR__ . '/_files/empty.json');
-        $resolve($data, $this->event, $this->queue);
+        Phake::when($this->response)->getBody()->thenReturn(file_get_contents(__DIR__ . '/_files/empty.json'));
+        $resolve($this->response, $this->event, $this->queue);
         Phake::verify($this->logger)->warning(
             'Query returned no results',
             array(
@@ -302,8 +304,8 @@ class PluginTest extends \PHPUnit_Framework_TestCase
         Phake::when($this->event)->getSource()->thenReturn('#channel');
         $requestConfig = $this->testHandleUrlWithVideoUrl('http://youtu.be/HFuTvTVAO-M');
         $resolve = $requestConfig['resolveCallback'];
-        $data = file_get_contents(__DIR__ . '/_files/success.json');
-        $resolve($data, $this->event, $this->queue);
+        Phake::when($this->response)->getBody()->thenReturn(file_get_contents(__DIR__ . '/_files/success.json'));
+        $resolve($this->response, $this->event, $this->queue);
         Phake::verify($this->queue)->ircPrivmsg('#channel', $message);
     }
 
