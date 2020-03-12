@@ -1,4 +1,5 @@
 {
+    "abandoned": true,
     "name": "phergie/phergie-irc-plugin-react-youtube",
     "description": "Phergie plugin for providing information about YouTube videos",
     "keywords": [ "phergie", "irc", "bot", "plugin" ],
